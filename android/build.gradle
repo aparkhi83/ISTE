@@ -1,16 +1,14 @@
-allprojects {
+plugins {
+    // ...
+
+    // Add the dependency for the Google services Gradle plugin
+    id("com.google.gms.google-services") version "4.4.2" apply false
+
+}allprojects {
     repositories {
         google()
         mavenCentral()
     }
-}
-
-rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
 }
 
 buildscript {
@@ -19,14 +17,25 @@ buildscript {
         mavenCentral() // Add Maven Central
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.7.3'
-        // Ensure a compatible Gradle plugin version
-        classpath 'com.google.gms:google-services:4.3.15' // Google Services plugin
+        classpath 'com.android.tools.build:gradle:8.7.3' // Gradle Plugin
+        classpath 'com.google.gms:google-services:4.4.2' // Google Services plugin
     }
 }
 
+// Avoid deprecated 'buildDir' usage
+// Use the recommended Gradle API for setting custom build directories
+subprojects {
+    afterEvaluate { project ->
+        project.layout.buildDirectory = file("${rootProject.projectDir}/build/${project.name}")
+    }
+}
 
+// If 'evaluationDependsOn' is required
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
+// Task for cleaning the build directory
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
